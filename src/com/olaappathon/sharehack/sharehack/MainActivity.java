@@ -1,7 +1,7 @@
-package info.androidhive.slidingmenu;
+package com.olaappathon.sharehack.sharehack;
 
-import info.androidhive.slidingmenu.adapter.NavDrawerListAdapter;
-import info.androidhive.slidingmenu.model.NavDrawerItem;
+import com.olaappathon.sharehack.sharehack.adapter.NavDrawerListAdapter;
+import com.olaappathon.sharehack.sharehack.model.NavDrawerItem;
 
 import java.util.ArrayList;
 

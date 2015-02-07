@@ -1,4 +1,4 @@
-package info.androidhive.slidingmenu.model;
+package com.olaappathon.sharehack.sharehack.model;
 
 public class NavDrawerItem {
 	
