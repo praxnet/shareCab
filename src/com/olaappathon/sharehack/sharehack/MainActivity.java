@@ -1,6 +1,7 @@
 package com.olaappathon.sharehack.sharehack;
 
 import com.olaappathon.sharehack.sharehack.adapter.NavDrawerListAdapter;
+import com.olaappathon.sharehack.sharehack.data.RideData;
 import com.olaappathon.sharehack.sharehack.model.NavDrawerItem;
 
 import java.util.ArrayList;
@@ -27,6 +28,10 @@ public class MainActivity extends Activity {
 	private ListView mDrawerList;
 	private ActionBarDrawerToggle mDrawerToggle;
 
+	private FragmentBookRide mFragmentBookRide;
+	private FragmentShareResult mFragmentShareResult;
+	private FragmentSearchRide mFragmentSearchRide;
+	
 	// nav drawer title
 	private CharSequence mDrawerTitle;
 
@@ -46,6 +51,9 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 
 		mTitle = mDrawerTitle = getTitle();
+		
+		mFragmentBookRide = new FragmentBookRide();
+		mFragmentSearchRide = new FragmentSearchRide();
 
 		// load slide menu items
 		navMenuTitles = getResources().getStringArray(R.array.nav_drawer_items);
@@ -65,6 +73,7 @@ public class MainActivity extends Activity {
 		navDrawerItems.add(new NavDrawerItem(navMenuTitles[1], navMenuIcons.getResourceId(1, -1)));
 		// Photos
 		navDrawerItems.add(new NavDrawerItem(navMenuTitles[2], navMenuIcons.getResourceId(2, -1)));
+		navDrawerItems.add(new NavDrawerItem(navMenuTitles[3], navMenuIcons.getResourceId(2, -1)));
 		// Communities, Will add a counter here
 		// navDrawerItems.add(new NavDrawerItem(navMenuTitles[3],
 		// navMenuIcons.getResourceId(3, -1), true, "22"));
@@ -89,13 +98,13 @@ public class MainActivity extends Activity {
 		getActionBar().setHomeButtonEnabled(true);
 
 		mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.drawable.ic_drawer, // nav
-																							 // menu
-																							 // toggle
-																							 // icon
+		                                                                                     // menu
+		                                                                                     // toggle
+		                                                                                     // icon
 		        R.string.app_name, // nav drawer open - description for
-								   // accessibility
+		                           // accessibility
 		        R.string.app_name // nav drawer close - description for
-								  // accessibility
+		                          // accessibility
 		) {
 			public void onDrawerClosed(View view) {
 				getActionBar().setTitle(mTitle);
@@ -163,21 +172,23 @@ public class MainActivity extends Activity {
 	/**
 	 * Diplaying fragment view for selected nav drawer list item
 	 * */
-	private void displayView(int position) {
+	public void displayView(int position) {
 		// update the main content by replacing fragments
 		Fragment fragment = null;
 		switch (position) {
 		case 0:
-			fragment = new FragmentBookRide();
+			fragment = mFragmentBookRide;
 			setTitle(getString(R.string.book_ride));
 			break;
 		case 1:
-//			fragment = new FindPeopleFragment();
-			startActivity(new Intent(this, MapActivity.class));
+			fragment = mFragmentSearchRide;
+			setTitle(getString(R.string.search_ride));
 			break;
 		case 2:
 			fragment = new PhotosFragment();
 			break;
+		case 3:
+			fragment = new FragmentSettings();
 
 		default:
 			break;
@@ -196,6 +207,13 @@ public class MainActivity extends Activity {
 			// error in creating fragment
 			Log.e("MainActivity", "Error in creating fragment");
 		}
+	}
+
+	public void attachList(ArrayList<RideData> rideDatas) {
+		FragmentManager fragmentManager = getFragmentManager();
+		fragmentManager.beginTransaction().replace(R.id.frame_container, new FragmentShareResult(rideDatas)).commit();
+
+		mDrawerLayout.closeDrawer(mDrawerList);
 	}
 
 	@Override

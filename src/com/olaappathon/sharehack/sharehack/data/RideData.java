@@ -11,10 +11,10 @@ import android.os.Parcelable;
  * 
  */
 public class RideData implements Parcelable {
-	private int sourceLong;
-	private int destLong;
-	private int destLati;
-	private int sourceLati;
+	private String sourceLong = "77.6478851";
+	private String destLong = "77.643894";
+	private String destLati = "12.9522217";
+	private String sourceLati = "12.9527967";
 	private String noOfMembers;
 	private int id = 1;
 	private String source;
@@ -39,38 +39,6 @@ public class RideData implements Parcelable {
 	}
 
 	public RideData() {
-	}
-
-	public int getSourceLong() {
-		return sourceLong;
-	}
-
-	public void setSourceLong(int sourceLong) {
-		this.sourceLong = sourceLong;
-	}
-
-	public int getDestLong() {
-		return destLong;
-	}
-
-	public void setDestLong(int destLong) {
-		this.destLong = destLong;
-	}
-
-	public int getDestLati() {
-		return destLati;
-	}
-
-	public void setDestLati(int destLati) {
-		this.destLati = destLati;
-	}
-
-	public int getSourceLati() {
-		return sourceLati;
-	}
-
-	public void setSourceLati(int sourceLati) {
-		this.sourceLati = sourceLati;
 	}
 
 	public String getSource() {
@@ -106,10 +74,10 @@ public class RideData implements Parcelable {
 	}
 
 	protected RideData(Parcel in) {
-		sourceLong = in.readInt();
-		destLong = in.readInt();
-		destLati = in.readInt();
-		sourceLati = in.readInt();
+		sourceLong = in.readString();
+		destLong = in.readString();
+		destLati = in.readString();
+		sourceLati = in.readString();
 		source = in.readString();
 		destination = in.readString();
 		share = in.readString();
@@ -125,16 +93,48 @@ public class RideData implements Parcelable {
 
 	@Override
 	public void writeToParcel(Parcel dest, int flags) {
-		dest.writeInt(sourceLong);
-		dest.writeInt(destLong);
-		dest.writeInt(destLati);
-		dest.writeInt(sourceLati);
+		dest.writeString(sourceLong);
+		dest.writeString(destLong);
+		dest.writeString(destLati);
+		dest.writeString(sourceLati);
 		dest.writeString(source);
 		dest.writeString(destination);
 		dest.writeString(share);
 		dest.writeString(time);
 		dest.writeInt(id);
 		dest.writeString(noOfMembers);
+	}
+
+	public String getSourceLong() {
+		return sourceLong;
+	}
+
+	public void setSourceLong(String sourceLong) {
+		this.sourceLong = sourceLong;
+	}
+
+	public String getDestLong() {
+		return destLong;
+	}
+
+	public void setDestLong(String destLong) {
+		this.destLong = destLong;
+	}
+
+	public String getDestLati() {
+		return destLati;
+	}
+
+	public void setDestLati(String destLati) {
+		this.destLati = destLati;
+	}
+
+	public String getSourceLati() {
+		return sourceLati;
+	}
+
+	public void setSourceLati(String sourceLati) {
+		this.sourceLati = sourceLati;
 	}
 
 	@SuppressWarnings("unused")

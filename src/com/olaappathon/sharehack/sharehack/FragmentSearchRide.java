@@ -1,8 +1,11 @@
 package com.olaappathon.sharehack.sharehack;
 
+import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.Map;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.app.DialogFragment;
 import android.app.Fragment;
@@ -10,7 +13,6 @@ import android.app.FragmentTransaction;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,12 +22,12 @@ import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.RadioGroup;
 import android.widget.TimePicker;
-import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
+import com.android.volley.VolleyLog;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -36,7 +38,7 @@ import com.olaappathon.sharehack.sharehack.data.RideData;
 import com.olaappathon.sharehack.sharehack.utils.Constant;
 import com.olaappathon.sharehack.sharehack.utils.Utils;
 
-public class FragmentBookRide extends Fragment {
+public class FragmentSearchRide extends Fragment {
 
 	private static Context mContext;
 	private static RideData mRideData;
@@ -45,34 +47,24 @@ public class FragmentBookRide extends Fragment {
 	private Button mButtonRidelater;
 	private EditText mEditTextDestination;
 	private EditText mEditTextSource;
+	static private MainActivity activity;
 
 	static final LatLng HAMBURG = new LatLng(53.558, 9.927);
 	static final LatLng KIEL = new LatLng(53.551, 9.993);
 	private GoogleMap map;
 
-	public FragmentBookRide() {
+	public FragmentSearchRide() {
 	}
 
 	private static ProgressDialog pDialog;
 
-	private static void showpDialog() {
-		if (!pDialog.isShowing())
-			pDialog.show();
-	}
-
-	private static void hidepDialog() {
-		if (pDialog.isShowing())
-			pDialog.dismiss();
-	}
-
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-
+		activity = (MainActivity) getActivity();
 		pDialog = new ProgressDialog(getActivity());
 		pDialog.setMessage("Please wait...");
 		pDialog.setCancelable(false);
-
-		View rootView = inflater.inflate(R.layout.fragment_bookride, container, false);
+		View rootView = inflater.inflate(R.layout.fragment_search_kride, container, false);
 		mContext = getActivity().getApplicationContext();
 		init(rootView);
 
@@ -126,7 +118,7 @@ public class FragmentBookRide extends Fragment {
 		mEditTextDestination = (EditText) view.findViewById(R.id.edittext_destination);
 		// mEditTextSource = (EditText) view.findViewById(R.id.edittext_source);
 
-		map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map_view)).getMap();
+		map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map_view_search)).getMap();
 
 		if (map != null) {
 			Marker hamburg = map.addMarker(new MarkerOptions().position(HAMBURG).title("Ola"));
@@ -134,32 +126,48 @@ public class FragmentBookRide extends Fragment {
 		}
 	}
 
+	private static void showpDialog() {
+		if (!pDialog.isShowing())
+			pDialog.show();
+	}
+
+	private static void hidepDialog() {
+		if (pDialog.isShowing())
+			pDialog.dismiss();
+	}
+
+	private static void launchList(ArrayList<RideData> rideDatas) {
+		activity.attachList(rideDatas);
+	}
+
 	private static void sendDataToServer() {
+
 		showpDialog();
-		String url = String.format(Utils.URL_POST_RIDE_REQUEST, Utils.getStringFromPref(mContext, Constant.PREF_KEY_IP_ADDRESS, "192.168.1.31"));
+		String url = String.format(Utils.URL_POST_RIDE_SHARE, Utils.getStringFromPref(mContext, Constant.PREF_KEY_IP_ADDRESS, "192.168.1.31"));
+		url += "?" + Utils.getGetParams(mRideData);
 		System.out.println("url" + url);
 
-		StringRequest postRequest = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
+		Map<String, String> params = Utils.getKeyValuePair(mRideData);
+
+		JsonObjectRequest req = new JsonObjectRequest(Request.Method.GET, url, new JSONObject(params), new Response.Listener<JSONObject>() {
 			@Override
-			public void onResponse(String response) {
-				hidepDialog();
-				Toast.makeText(mContext, R.string.ride_request_sent, Toast.LENGTH_SHORT).show();
-				Log.d("Response", response);
+			public void onResponse(JSONObject response) {
+				try {
+					hidepDialog();
+					launchList(Utils.getRideDataArray(response.toString()));
+					VolleyLog.v("Response:%n %s", response.toString(4));
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
 			}
 		}, new Response.ErrorListener() {
 			@Override
 			public void onErrorResponse(VolleyError error) {
 				hidepDialog();
-				Toast.makeText(mContext, R.string.error_responce, Toast.LENGTH_SHORT).show();
-				Log.d("Error.Response", error.getMessage() + " " + error.getLocalizedMessage() + " " + error.getCause());
+				VolleyLog.e("Error: ", error.getMessage());
 			}
-		}) {
-			@Override
-			protected Map<String, String> getParams() {
-				return Utils.getKeyValuePair(mRideData);
-			}
-		};
-		AppController.getInstance().getRequestQueue().add(postRequest);
+		});
+		AppController.getInstance().getRequestQueue().add(req);
 	}
 
 	public static class AlertDialogFragment extends DialogFragment {
@@ -226,7 +234,7 @@ public class FragmentBookRide extends Fragment {
 			mRideOK.setOnClickListener(mClickListener);
 			mRideCancel.setOnClickListener(mClickListener);
 			mCheckBoxShare = (CheckBox) v.findViewById(R.id.checkbox_share_ride);
-
+			mCheckBoxShare.setVisibility(View.GONE);
 			mTimePicker = (TimePicker) v.findViewById(R.id.timepicker);
 			mTimePicker.setVisibility(mShowTimer ? View.VISIBLE : View.GONE);
 			mTimePicker.setOnTimeChangedListener(new TimePicker.OnTimeChangedListener() {
