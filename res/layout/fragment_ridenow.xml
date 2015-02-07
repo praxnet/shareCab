@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <TimePicker
+        android:id="@+id/timepicker"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <CheckBox
+        android:id="@+id/checkbox_share_ride"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/share_ride" />
+
+    <RadioGroup
+        android:id="@+id/radio_group_share"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone" >
+
+        <RadioButton
+            android:id="@+id/radio_only_contact"
+            android:text="@string/share_with_contact" />
+
+        <RadioButton
+            android:id="@+id/radio_public"
+            android:text="@string/share_with_public" />
+    </RadioGroup>
+
+    <include layout="@layout/ok_cancel" />
+
+</LinearLayout>
