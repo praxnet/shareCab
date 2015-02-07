@@ -1,22 +1,29 @@
 package com.olaappathon.sharehack.sharehack;
 
 import java.util.Calendar;
+import java.util.Map;
 
 import android.app.DialogFragment;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
+import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.RadioGroup;
 import android.widget.TimePicker;
+import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -25,9 +32,11 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.olaappathon.sharehack.sharehack.data.RideData;
 import com.olaappathon.sharehack.sharehack.utils.Constant;
+import com.olaappathon.sharehack.sharehack.utils.Utils;
 
 public class FragmentBookRide extends Fragment {
 
+	private static Context mContext;
 	private static RideData mRideData;
 
 	private Button mButtonRideNow;
@@ -46,6 +55,7 @@ public class FragmentBookRide extends Fragment {
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
 		View rootView = inflater.inflate(R.layout.fragment_bookride, container, false);
+		mContext = getActivity().getApplicationContext();
 		init(rootView);
 
 		return rootView;
@@ -108,6 +118,30 @@ public class FragmentBookRide extends Fragment {
 
 	private static void sendDataToServer() {
 
+		StringRequest putRequest = new StringRequest(Request.Method.PUT, Utils.URL_POST_RIDE_REQUEST, new Response.Listener<String>() {
+			@Override
+			public void onResponse(String response) {
+				Log.d("Response", response);
+				if (AlertDialogFragment.mFrag != null) {
+					AlertDialogFragment.mFrag.dismiss();
+				}
+				Toast.makeText(mContext, R.string.ride_request_sent, Toast.LENGTH_SHORT).show();
+			}
+		}, new Response.ErrorListener() {
+			@Override
+			public void onErrorResponse(VolleyError error) {
+				Log.d("Error.Response", error + "");
+				Toast.makeText(mContext, R.string.error_responce, Toast.LENGTH_SHORT).show();
+			}
+		}) {
+
+			@Override
+			protected Map<String, String> getParams() {
+				return Utils.getKeyValuePair(mRideData);
+			}
+
+		};
+		AppController.getInstance().getRequestQueue().add(putRequest);
 	}
 
 	public static class AlertDialogFragment extends DialogFragment {
@@ -117,6 +151,7 @@ public class FragmentBookRide extends Fragment {
 		TimePicker mTimePicker;
 		Button mRideOK, mRideCancel;
 		static AlertDialogFragment mFrag;
+		EditText mEditTextNoOfMembers;
 
 		private static String pad(int c) {
 			if (c >= 10)
@@ -131,6 +166,8 @@ public class FragmentBookRide extends Fragment {
 			public void onClick(View v) {
 				switch (v.getId()) {
 				case R.id.button_ok:
+					mRideData.setId(1);
+					mRideData.setNoOfMembers(mEditTextNoOfMembers.getText().toString());
 					sendDataToServer();
 					break;
 				case R.id.button_cancel:
@@ -164,6 +201,7 @@ public class FragmentBookRide extends Fragment {
 
 			getDialog().setTitle("Ride!!");
 
+			mEditTextNoOfMembers = (EditText) v.findViewById(R.id.no_of_members);
 			mRideOK = (Button) v.findViewById(R.id.button_ok);
 			mRideCancel = (Button) v.findViewById(R.id.button_cancel);
 			mRideOK.setOnClickListener(mClickListener);

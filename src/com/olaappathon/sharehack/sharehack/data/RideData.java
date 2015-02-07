@@ -15,10 +15,28 @@ public class RideData implements Parcelable {
 	private int destLong;
 	private int destLati;
 	private int sourceLati;
+	private String noOfMembers;
+	private int id = 1;
 	private String source;
 	private String destination;
 	private String share;
 	private String time;
+
+	public String getNoOfMembers() {
+		return noOfMembers;
+	}
+
+	public void setNoOfMembers(String noOfMembers) {
+		this.noOfMembers = noOfMembers;
+	}
+
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
 
 	public RideData() {
 	}
@@ -96,6 +114,8 @@ public class RideData implements Parcelable {
 		destination = in.readString();
 		share = in.readString();
 		time = in.readString();
+		id = in.readInt();
+		noOfMembers = in.readString();
 	}
 
 	@Override
@@ -113,6 +133,8 @@ public class RideData implements Parcelable {
 		dest.writeString(destination);
 		dest.writeString(share);
 		dest.writeString(time);
+		dest.writeInt(id);
+		dest.writeString(noOfMembers);
 	}
 
 	@SuppressWarnings("unused")
